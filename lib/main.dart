@@ -1,4 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fluttertemplate/task/bloc/task_bloc.dart';
+import 'package:fluttertemplate/models/task/task.dart';
+import 'package:fluttertemplate/repositories/task/task_repository.dart';
+import 'package:fluttertemplate/task/widgets/task.dart';
 
 void main() {
   runApp(const MyApp());
@@ -11,42 +17,30 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'ToDo M-You App',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a blue toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+          useMaterial3: true,
+          primaryColor: const Color(0XFFceef86),
+          // ignore: deprecated_member_use
+          backgroundColor: const Color(0XFF201a1a)),
+      home: RepositoryProvider(
+        create: (context) => TaskRepository(),
+        child: MultiBlocProvider(
+          providers: [
+            BlocProvider(
+                create: (context) => TaskBloc(
+                      RepositoryProvider.of<TaskRepository>(context),
+                    )..add(const LoadTask()))
+          ],
+          child: const MyHomePage(title: 'Your Tasks'),
+        ),
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
 
   final String title;
 
@@ -55,70 +49,146 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+  late TextEditingController textInputTitleController;
+  late TextEditingController textInputUserIdController;
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+  @override
+  void initState() {
+    super.initState();
+
+    textInputTitleController = TextEditingController();
+    textInputUserIdController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    textInputTitleController.dispose();
+    textInputUserIdController.dispose();
+    super.dispose();
+  }
+
+  Future<Task?> _openDialog(int lastId) {
+    textInputTitleController.text = '';
+    textInputUserIdController.text = '';
+    return showDialog<Task>(
+        context: context,
+        builder: (context) => AlertDialog(
+              backgroundColor: const Color(0XFFfeddaa),
+              title: TextField(
+                  controller: textInputTitleController,
+                  decoration: const InputDecoration(
+                      fillColor: Color(0XFF322a1d),
+                      hintText: 'Task Title',
+                      border: InputBorder.none)),
+              content: TextField(
+                  controller: textInputUserIdController,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: <TextInputFormatter>[
+                    FilteringTextInputFormatter.digitsOnly
+                  ],
+                  decoration: const InputDecoration(
+                      hintText: 'User ID',
+                      border: InputBorder.none,
+                      filled: true)),
+              actions: [
+                TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text(
+                      'Cancel',
+                      style: TextStyle(color: Colors.grey),
+                    )),
+                TextButton(
+                    onPressed: (() {
+                      if (textInputTitleController.text != '' &&
+                          textInputUserIdController.text != '') {
+                        Navigator.of(context).pop(Task(
+                            id: lastId + 1,
+                            userId: int.parse(textInputUserIdController.text),
+                            title: textInputTitleController.text));
+                      }
+                    }),
+                    child: const Text('Add',
+                        style: TextStyle(color: Color(0xFF322a1d))))
+              ],
+            ));
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
+    int? lastId;
+
     return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
+        backgroundColor: Theme.of(context).colorScheme.background,
+        title: Text(
+          widget.title,
+          style:
+              const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
+      body: BlocBuilder<TaskBloc, TaskState>(
+        builder: (context, state) {
+          if (state is TaskLoading) {
+            return const CircularProgressIndicator();
+          }
+          if (state is TaskLoaded) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 18.0),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget>[
+                    ...state.tasks.map(
+                      (task) => InkWell(
+                        onTap: (() {
+                          context.read<TaskBloc>().add(UpdateTask(
+                              task:
+                                  task.copyWith(isComplete: !task.isComplete)));
+                        }),
+                        child: TaskWidget(
+                          task: task,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 80,
+                    )
+                  ],
+                ),
+              ),
+            );
+          } else {
+            return const Text('No Task Found');
+          }
+        },
+      ),
+      floatingActionButton: BlocListener<TaskBloc, TaskState>(
+        listener: (context, state) {
+          if (state is TaskLoaded) {
+            lastId = state.tasks.last.id;
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text('Task Updated!'),
+            ));
+          }
+        },
+        child: FloatingActionButton(
+          backgroundColor: const Color(0xFFf8bd47),
+          foregroundColor: const Color(0xFF322a1d),
+          onPressed: () async {
+            Task? task = await _openDialog(lastId ?? 0);
+            if (task != null) {
+              // ignore: use_build_context_synchronously
+              context.read<TaskBloc>().add(
+                    AddTask(task: task),
+                  );
+            }
+          },
+          tooltip: 'Increment',
+          child: const Icon(Icons.add),
+        ),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
