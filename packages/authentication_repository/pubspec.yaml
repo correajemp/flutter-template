@@ -1,0 +1,13 @@
+name: authentication_repository
+description: Dart package which manages the authentication domain.
+publish_to: none
+
+environment:
+  sdk: '>=3.1.4 <4.0.0'
+
+dependencies:
+  common_repository:
+    path: ../../packages/common_repository
+
+  http: ^0.13.5
+  flutter_dotenv: ^5.1.0

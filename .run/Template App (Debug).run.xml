@@ -1,0 +1,8 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Template App (Debug)" type="FlutterRunConfigurationType" factoryName="Flutter">
+    <option name="additionalArgs" value="--flavor=staging --target=lib/main_production.dart" />
+    <option name="buildFlavor" value="production" />
+    <option name="filePath" value="$PROJECT_DIR$/lib/main_production.dart" />
+    <method v="2" />
+  </configuration>
+</component>

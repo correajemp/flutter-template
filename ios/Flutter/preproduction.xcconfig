@@ -1,0 +1,13 @@
+//
+//  preproduction.xcconfig
+//  Runner
+//
+//  Created by Jem Correa on 10/20/23.
+//
+
+// Configuration settings file format documentation can be found at:
+// https://help.apple.com/xcode/#/dev745c5c974
+#include "Generated.xcconfig"
+FLUTTER_TARGET=lib/main_preproduction.dart
+FLUTTER_BUILD_NUMBER=1
+FLUTTER_BUILD_NAME=1.0.0

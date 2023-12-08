@@ -1,0 +1,73 @@
+# This file contains the fastlane.tools configuration
+# You can find the documentation at https://docs.fastlane.tools
+#
+# For a list of all available actions, check out
+#
+#     https://docs.fastlane.tools/actions
+#
+# For a list of all available plugins, check out
+#
+#     https://docs.fastlane.tools/plugins/available-plugins
+#
+
+# Uncomment the line if you want fastlane to automatically update itself
+# update_fastlane
+
+default_platform(:android)
+
+platform :android do
+  desc "Deploy Production to Firebase Distribution"
+  lane :deploy_production_to_firebase do
+    gradle(
+      flavor: "production", 
+      task: "assemble",
+      build_type: "Release", 
+      flags: "-Ptarget=lib/main_production.dart"
+    )
+
+    firebase_app_distribution(
+      app: ENV['PRODUCTION_FIREBASE_APP_ID'],
+      release_notes_file: "../release-notes.txt",
+      apk_path: "../build/app/outputs/flutter-apk/app-production-release.apk",
+      firebase_cli_token: ENV["FIREBASE_CLI_TOKEN"]
+    )
+  end
+end
+
+platform :android do
+  desc "Deploy PreProduction to Firebase Distribution"
+  lane :deploy_preproduction_to_firebase do
+    gradle(
+      flavor: "preproduction", 
+      task: "assemble",
+      build_type: "Release", 
+      flags: "-Ptarget=lib/main_preproduction.dart"
+    )
+
+    firebase_app_distribution(
+      app: ENV['PREPRODUCTION_FIREBASE_APP_ID'],
+      release_notes_file: "../release-notes.txt",
+      apk_path: "../build/app/outputs/flutter-apk/app-preproduction-release.apk",
+      firebase_cli_token: ENV["FIREBASE_CLI_TOKEN"]
+    )
+  end
+end
+
+platform :android do
+  desc "Deploy Staging to Firebase Distribution"
+  lane :deploy_staging_to_firebase do
+    gradle(
+      flavor: "staging", 
+      task: "assemble",
+      build_type: "Release", 
+      flags: "-Ptarget=lib/main_staging.dart"
+    )
+
+    firebase_app_distribution(
+      app: ENV['STAGING_FIREBASE_APP_ID'],
+      release_notes_file: "../release-notes.txt",
+      apk_path: "../build/app/outputs/flutter-apk/app-staging-release.apk",
+      firebase_cli_token: ENV["FIREBASE_CLI_TOKEN"]
+    )
+  end
+end

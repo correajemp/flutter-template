@@ -1,0 +1,8 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="PREPROD - Template App (Profile)" type="FlutterRunConfigurationType" factoryName="Flutter">
+    <option name="additionalArgs" value="--flavor=staging --target=lib/main_preproduction.dart --profile" />
+    <option name="buildFlavor" value="preproduction" />
+    <option name="filePath" value="$PROJECT_DIR$/lib/main_preproduction.dart" />
+    <method v="2" />
+  </configuration>
+</component>
